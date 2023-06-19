@@ -18,13 +18,17 @@ clc,clear
 % Hsl            耗水率（发电流量/水量）
 
 %% 初始化数据
+Q=xlsread('result_teacher.xlsx',"F2:F21")'; %发电流量
+QS=398.49; % 起始水位
+ZZ=397.72; % 终止水位
+C=50; % 增量
+BC=1; % 步长
 %导入入库流量和水库库容与水位关系
 filename1= "试验数据1.txt";
 delimiterIn1=" ";
 headerlinesIn1=4;
 test1=importdata(filename1,delimiterIn1,headerlinesIn1);
 Q_IN=test1.data;% 入库流量
-Q_IN = Q_IN;
 filename3= "试验数据3.txt";
 delimiterIn3=" ";
 headerlinesIn3=5;
@@ -33,11 +37,10 @@ dateset3=test3.data; %水库库容
 T=20;% 阶段
 V_max=quest_v_Z_V(412,dateset3)*ones(20,1); %最大库容
 V_min=quest_v_Z_V(380,dateset3)*ones(20,1); %最小库容
-V_SYT=quest_v_Z_V(398.49,dateset3); %时段末库容
-V_SYT0 = quest_v_Z_V(397.72,dateset3); %时段初库容
-Q=xlsread('result_teacher.xlsx',"F2:F21")'; %发电流量 即首个可行解
+V_SYT=quest_v_Z_V(QS,dateset3); %时段末库容
+V_SYT0 = quest_v_Z_V(ZZ,dateset3); %时段初库容
 for i=1:20
-Q_fd(:,i)=Q(i)-50:1:Q(i)+50; % Q_fd 发电流量的廊道
+Q_fd(:,i)=Q(i)-C:BC:Q(i)+C; % Q_fd 发电流量可能取值
 end
 [a,~] = size(Q_fd);
 Q_qs = zeros(a,a);
