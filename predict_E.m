@@ -5,6 +5,9 @@ function [E] = predict_E(V_1,tim,dateset3)
 
 [n,~]=size(V_1);
 V1=V_1/1000000;
+if V_1==0
+    E=-10000000;
+end
 for i=1:n
     for k=1:70
         if V1(i)>=dateset3(k,2)&&V1(i)<=dateset3(k+1,2)
