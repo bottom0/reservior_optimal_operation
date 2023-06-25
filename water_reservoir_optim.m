@@ -1,7 +1,7 @@
 function [V_opt, V_opt_num, E_eco_, Q_fd_opt, Q_qs,E_eco_stage, Hsl] = water_reservoir_optim(V_max, V_min,V_SYT0,...
                                                            V_opt, V_opt_num, E_eco_, Q_fd_opt, Q_qs,...
                                                            Q_fd,Q_IN,...
-                                                           t,tim,a,dateset3,E_eco_stage,Hsl)
+                                                           t,tim,a, CL, dateset2, dateset3,E_eco_stage,Hsl)
   % 变量          定义                                                                              单位
   % -------------------------------------------------------------------------------------------------------------------
   % V_opt         在不同决策发电流量Q_fd和时段t下的数组，它包含其对应的库容，二维数组                  m^3           
@@ -39,6 +39,7 @@ else
     % t=1要收敛
     V_temp=ones(1,size(V_opt(:,t+1),1))*V_SYT0;
 end
+
     % 约束
     % 水库约束
     [a,~] = size(V_temp);
@@ -62,18 +63,23 @@ end
     for q=1:a
         for v=1:size(V_opt(:,t+1),1)
             if V_temp(q,v) <= 0
-                E_eco(q,v)=-10000;
+                E_eco(q,v)=-10000000000;
                 V_temp(q,v)=0;
             else
-                E_eco(q,v) = 9.81*Q_temp(q,v)*(Z_V(V_opt(v,t+1),dateset3)-308)*24*tim;
+                V_opt(v,t+1);
+                E_eco(q,v) = 10.004*Q_temp(q,v)*(Z_V(V_opt(v,t+1),dateset3)-308)*24*tim;
+            end
             if E_eco(q,v) >= predict_E(V_temp(q,v),tim, dateset3)
                 E_eco(q,v)=predict_E(V_temp(q,v),tim, dateset3);
-            else
-                if E_eco(q,v) <=167000*tim*24
-                    E_eco(q,v)=-10000;
-                    V_temp(q,v)=0;
+            else 
+                for m=1:9 %指示出力条数
+                    if V_temp(q,v)>=quest_v_Z_V(dateset2(t,m),dateset3)&&V_temp(q,v)<=quest_v_Z_V(dateset2(t,m+1),dateset3)
+                        if E_eco(q,v) <=CL(m)*1000*tim*24 
+                            E_eco(q,v)=-1000000000;
+                            V_temp(q,v)=0;
+                        end
+                    end
                 end
-            end
             end
         end
     end
@@ -100,4 +106,4 @@ end
             Hsl(i,t)=Q_fd_opt(i,t)*(3600*24*tim)/E_eco_stage(i,t);
     end
 
-end
+end 
